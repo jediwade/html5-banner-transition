@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>banner example</title>
+		
+		<style type="text/css">
+			* {
+				-webkit-text-size-adjust:none;
+				-ms-text-size-adjust:none;
+				margin:0;
+				padding:0;
+			}
+			img {
+				border:none;
+				display:block;
+			}
+			#banner {
+				width:300px;
+				height:250px;
+				position:absolute;
+				background-color:#ffffff;
+				cursor:pointer;
+			}
+			#border {
+				width:300px;
+				height:250px;
+				box-sizing:border-box;
+				border:1px solid #000000;
+			}
+			#bkg {
+				width:300px;
+				height:250px;
+				background-color:#ff0000;
+			}
+			#image1, #image2, #image3, #logo, #copy, #cta, #copyright, #bkg {
+				opacity:0;
+			}
+			#logo {
+				left:104px;
+				top:30px;
+			}
+			#copy {
+				left:64px;
+				top:100px;
+			}
+			#cta {
+				left:98px;
+				top:180px;
+			}
+			#preloader {
+				top:109px;
+				left:134px;
+				opacity:1;
+			}
+			#copyright {
+				left:3px;
+				bottom:2px;
+				font-family:Helvetica, Arial, sans-serif;
+				font-size:7px;
+				line-height:7px;
+				color:rgba(0,0,0,0.9);
+				text-shadow:rgba(255,0,0,0.2) 0px 0px 3px;
+				-webkit-transform:translate3d(0,0,0);
+				-moz-transform:translate3d(0,0,0);
+				transform:translate3d(0,0,0);
+			}
+			.layer {
+				position:absolute;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="banner" onclick="alert('banner clicked')">
+			<img class="layer" id="preloader" src="images/preloader.gif" width="32" height="32" alt="">
+			
+			<!-- FRAME 1–3 -->
+			<img class="layer" id="image1" src="images/image1.jpg" width="300" height="250" alt="">
+			<img class="layer" id="image2" src="images/image2.jpg" width="300" height="250" alt="">
+			<img class="layer" id="image3" src="images/image3.jpg" width="300" height="250" alt="">
+			<!-- FRAME 1–3 -->
+			
+			<!-- END_FRAME -->
+			<img class="layer" id="bkg" src="images/bkg.jpg" width="300" height="250" alt="">
+			<img class="layer" id="logo" src="images/logo.png" width="92" height="30" alt="">
+			<img class="layer" id="copy" src="images/copy.png" width="172" height="43" alt="">
+			<img class="layer" id="cta" src="images/cta.png" width="104" height="38" alt="">
+			<!-- /END_FRAME -->
+			
+			<div class="layer" id="copyright">
+				&copy;Copyright
+			</div>
+			
+			<div class="layer" id="border"></div>
+		</div>
+
+		<script type="text/javascript" src="js/BannerTransition.min.js"></script>
+		<script type="text/javascript">
+			var timeline = new Timeline();
+			timeline.addKeyframe("0ms");
+			timeline.addStyleChange("preloader", "500ms", "opacity", "0", Ease.EASE_IN);
+			timeline.addStyleChange("copyright", "500ms", "opacity", "1", Ease.EASE_OUT);
+			timeline.addStyleChange("image1", "500ms", "opacity", "1", Ease.EASE_OUT);
+			
+			timeline.addKeyframe("3s");
+			timeline.addStyleChange("image2", "500ms", "opacity", "1");
+
+			timeline.addKeyframe("6s");
+			timeline.addStyleChange("image3", "500ms", "opacity", "1");
+
+			timeline.addKeyframe("9s");
+			timeline.addStyleChange("bkg", "500ms", "opacity", "1");
+
+			timeline.addKeyframe("10s");
+			timeline.addStyleChange("logo", "500ms", "opacity", "1");
+
+			timeline.addKeyframe("11s");
+			timeline.addStyleChange("copy", "500ms", "opacity", "1", Ease.EASE_IN_OUT);
+
+			timeline.addKeyframe("12s");
+			timeline.addStyleChange("cta", "500ms", "opacity", "1", Ease.EASE_IN_OUT);
+
+			function onPageLoad(e) {
+				window.removeEventListener("load", onPageLoad);
+				timeline.play();// tell Timeline to begin playing
+			}
+
+			window.addEventListener("load", onPageLoad);// add event listener for page being done loading
+		</script>
+	</body>
+</html>

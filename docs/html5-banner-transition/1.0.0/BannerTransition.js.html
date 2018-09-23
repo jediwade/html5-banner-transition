@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: BannerTransition.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: BannerTransition.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*jshint 
+	asi:true, browser:true
+*/
+/**
+* @file Provides static contstant objects for use with {@link Timeline} class methods.
+* @namespace BannerTransition
+*/
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// -------------------------------------------------- STATICS --------------------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Object containing the constants related to the timing function aspect of CSS transitions that can be used.
+* @type {!object}
+* @readonly
+* @constant
+* @memberof BannerTransition
+* @property {string} EASE - Specifies an animation with a slow start, then fast, then end slowly.
+* @property {string} EASE_IN - Specifies an animation with a slow start.
+* @property {string} EASE_OUT - Specifies an animation with a slow end.
+* @property {string} EASE_IN_OUT - Specifies an animation with a slow start and end.
+* @property {string} LINEAR - Specifies an animation with the same speed from start to end.
+*/
+var Ease = {
+	EASE:"ease",
+	EASE_IN:"ease-in",
+	EASE_OUT:"ease-out",
+	EASE_IN_OUT:"ease-in-out",
+	LINEAR:"linear"
+};
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Object containing the constants related to the events of a Timeline of transitions.
+* @type {!object}
+* @readonly
+* @constant
+* @memberof BannerTransition
+* @property {string} START - Specifies a Timeline of transitions has started playing.
+* @property {string} RESUME - Specifies a Timeline of transitions has resumed playback.
+* @property {string} PAUSE - Specifies a Timeline of transitions has paused playback.
+* @property {string} FINISH - Specifies a Timeline of transitions has finished playing.
+*/
+var TimelineEvent = {
+	START:"start",
+	RESUME:"resume",
+	PAUSE:"pause",
+	FINISH:"finish"
+};
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// -------------------------------------------------- Timeline -------------------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Use the Timeline object to create a schedule of transitions to occur at specified points in time.&lt;br />
+* &lt;br />
+* To create a new Timeline, create a new variable that is equal to a "new Timeline()". After that, call the 
+* addKeyframe() method on that variable to add a keyframe to the timeline. The next step is to call the 
+* addStyleChange() method, passing in the target HTML element that needs a change made to, the duration of the CSS 
+* transition, the style that should be changed, and the new value of the style. The addStyleChange() can be called 
+* any number of times to make multiple style changes to the same target HTML element or different targets.&lt;br />
+* &lt;br />
+* Once all the styles for that keyframe have been set, you can call the addKeyframe() method again for a different 
+* point in time and have that method call followed by addStyleChange(). After all the keyframes and style changes 
+* have been added, call the play() method to kick off the playback of the timeline of animations.
+* 
+* @constructor
+* @final
+* @type {Timeline}
+* 
+* @example &lt;caption>The following example shows a start to finish usage of creating a timeline and using the 
+* methods of the Timeline class. It is assumed that the BannerTransition.js JavaScript file is in the same 
+* directory as the HTML file. This example features four frames in total. The first three are just a single 
+* image containing everything in that frame. The final frame is composed of a logo, an alpha png image with 
+* copy, and a CTA button.&lt;/caption>
+* &lt;!DOCTYPE html>
+* &lt;html>
+* 	&lt;head>
+* 		&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+* 		&lt;meta http-equiv="X-UA-Compatible" content="IE=edge">
+* 		&lt;title>banner example&lt;/title>
+* 		
+* 		&lt;style type="text/css">
+* 			* {
+* 				-webkit-text-size-adjust:none;
+* 				-ms-text-size-adjust:none;
+* 				margin:0;
+* 				padding:0;
+* 			}
+* 			img {
+* 				border:none;
+* 				display:block;
+* 			}
+* 			#banner {
+* 				width:300px;
+* 				height:250px;
+* 				position:absolute;
+* 				background-color:#ffffff;
+* 				cursor:pointer;
+* 			}
+* 			#border {
+* 				width:300px;
+* 				height:250px;
+* 				box-sizing:border-box;
+* 				border:1px solid #000000;
+* 			}
+* 			#bkg {
+* 				width:300px;
+* 				height:250px;
+* 				background-color:#ff0000;
+* 			}
+* 			#image1, #image2, #image3, #logo, #copy, #cta, #copyright, #bkg {
+* 				opacity:0;
+* 			}
+* 			#preloader {
+* 				top:109px;
+* 				left:134px;
+* 				opacity:1;
+* 			}
+* 			#logo {
+* 				left:104px;
+* 				top:30px;
+* 			}
+* 			#copy {
+* 				left:64px;
+* 				top:100px;
+* 			}
+* 			#cta {
+* 				left:98px;
+* 				top:180px;
+* 			}
+* 			#copyright {
+* 				right:3px;
+* 				bottom:2px;
+* 				font-family:Helvetica, Arial, sans-serif;
+* 				font-size:7px;
+* 				line-height:7px;
+* 				color:rgba(0,0,0,0.9);
+* 				text-shadow:rgba(255,0,0,0.2) 0px 0px 3px;
+* 				-webkit-transform:translate3d(0,0,0);
+* 				-moz-transform:translate3d(0,0,0);
+* 				transform:translate3d(0,0,0);
+* 			}
+* 			.layer {
+* 				position:absolute;
+* 			}
+* 		&lt;/style>
+* 	&lt;/head>
+* 
+* 	&lt;body>
+* 		&lt;div id="banner" onclick="alert('banner clicked')">
+* 			&lt;img class="layer" id="preloader" src="preloader.gif" width="32" height="32" alt="">
+* 			
+* 			&lt;!-- FRAME 1–3 -->
+* 			&lt;img class="layer" id="image1" src="image1.jpg" width="300" height="250" alt="">
+* 			&lt;img class="layer" id="image2" src="image2.jpg" width="300" height="250" alt="">
+* 			&lt;img class="layer" id="image3" src="image3.jpg" width="300" height="250" alt="">
+* 			&lt;!-- FRAME 1–3 -->
+* 			
+* 			&lt;!-- END_FRAME -->
+* 			&lt;img class="layer" id="bkg" src="bkg.jpg" width="300" height="250" alt="">
+* 			&lt;img class="layer" id="logo" src="logo.png" width="92" height="30" alt="">
+* 			&lt;img class="layer" id="copy" src="copy.png" width="172" height="43" alt="">
+* 			&lt;img class="layer" id="cta" src="cta.png" width="104" height="38" alt="">
+* 			&lt;!-- /END_FRAME -->
+* 			
+* 			&lt;div class="layer" id="copyright">
+* 				&amp;copy;Copyright
+* 			&lt;/div>
+* 			
+* 			&lt;div class="layer" id="border">&lt;/div>
+* 		&lt;/div>
+* 
+* 		&lt;script type="text/javascript" src="BannerTransition.js">&lt;/script>
+* 		&lt;script type="text/javascript">
+* 			// create a new Timeline object, then add all keyframes and styles
+* 			var timeline = new Timeline();
+* 			// create a keyframe of zero milliseconds that will happen immediately
+* 			timeline.addKeyframe("0ms");
+* 			// fade off the preloader animated gif over half a second
+* 			timeline.addStyleChange("preloader", "500ms", "opacity", "0", Ease.EASE_IN);
+* 			// fade up the copyright over half a second using ease out easing
+* 			timeline.addStyleChange("copyright", "500ms", "opacity", "1", Ease.EASE_OUT);
+* 			// fade up the first image over half a second using ease out easing
+* 			timeline.addStyleChange("image1", "500ms", "opacity", "1", Ease.EASE_OUT);
+* 
+* 			// Notice that the next four addStyleChange() calls are leaving off the Ease
+* 			// parameter. This is ok because ease is an optional argument to provide. If 
+* 			// no value is provided for the ease type, it will default to "ease"
+* 			timeline.addKeyframe("3000ms");
+* 			timeline.addStyleChange("image2", "500ms", "opacity", "1");
+* 
+* 			timeline.addKeyframe("6000ms");
+* 			timeline.addStyleChange("image3", "500ms", "opacity", "1");
+* 
+* 			timeline.addKeyframe("9000ms");
+* 			timeline.addStyleChange("bkg", "500ms", "opacity", "1");
+* 
+* 			timeline.addKeyframe("10000ms");
+* 			timeline.addStyleChange("copy", "500ms", "opacity", "1");
+* 
+* 			timeline.addKeyframe("11000ms");
+* 			timeline.addStyleChange("logo", "500ms", "opacity", "1", Ease.EASE_IN_OUT);
+* 
+* 			timeline.addKeyframe("12000ms");
+* 			timeline.addStyleChange("cta", "500ms", "opacity", "1", Ease.EASE_IN_OUT);
+* 
+* 			function onPageLoad(e) {
+* 				window.removeEventListener("load", onPageLoad);
+* 				timeline.play();// tell Timeline to begin playing
+* 			}
+* 
+* 			window.addEventListener("load", onPageLoad);// add event listener for page being done loading
+* 		&lt;/script>
+* 	&lt;/body>
+* &lt;/html>
+*/
+function Timeline() {
+	/**
+	* Value representing the current keyframe building built.
+	* 
+	* @type {string}
+	* @instance
+	* @private
+	*/
+	this._currentKeyframe = "";
+
+	/**
+	* Number representing the id of the setTimeout() timer.
+	* 
+	* @type {number}
+	* @instance
+	* @private
+	*/
+	this._timer = -1;
+
+	/**
+	* Boolean representing the state of the timer.
+	* 
+	* @type {boolean}
+	* @instance
+	* @private
+	*/
+	this._timerRunning = false;
+
+	/**
+	* Number representing the number of ticks that have happened. Is equal to number of ticks times tickRate.
+	* 
+	* @type {!number}
+	* @instance
+	* @private
+	*/
+	this._counter = 0;
+
+	/**
+	* Object that contains a list of keyframes that represents a specific time in milliseconds. Each keyframe has 
+	* a list of objects that should be changed.
+	* 
+	* @type {!Object}
+	* @property {Number} length - The number of keyframes this object has.
+	* @property {Object} "XXms" - Dynamically added Array properties that contains a list of objects that represent 
+	* an HTML element to animate and the properties of that element that should be changed.
+	* @instance
+	* @private
+	*/
+	this._keyframes = {};
+
+	/**
+	* The number of keyframes this object has.
+	* 
+	* @type {number}
+	* @instance
+	* @private
+	*/
+	this._length = 0;
+
+	/**
+	* The collection of events.
+	* 
+	* @type {array}
+	* @instance
+	* @private
+	*/
+	this._events = [];
+	
+	return this;
+}
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// -------------------------------------- Timeline static private variables ------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+/**
+* Number representing how often, in milliseconds, that the timer should tick to trigger transitions on HTML elements.
+* 
+* @type {!number}
+* @static
+* @constant
+* @private
+*/
+Timeline._tickRate = 50;
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// -------------------------------------- Timeline static private methods --------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Function to retreive the current style value of a specific CSS property on a target element.
+* 
+* @param {!string} target - The HTML id value for a specific HTML element.
+* @param {!string} style - The style to get a value for.
+* @memberof Timeline
+* @function _getStyleValue
+* @returns {string} - The current value of the style provided. This may return a value in a different format than 
+* what it was set in originally, i.e. rga(255,255,255) instead of #ffffff for a color value.
+* @final
+* @static
+* @private
+*/
+Timeline._getStyleValue = function(target, style) {
+	var x = document.getElementById(target);
+	
+	if (x.currentStyle) {
+		x = x.currentStyle[style];
+	}
+	else if (window.getComputedStyle) {
+		x = document.defaultView.getComputedStyle(x).getPropertyValue(style);
+	}
+	
+	return x;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Function to clean up duration values. Provided value can be number or string.
+* 
+* @param {!Object} duration - Duration value to clean up.
+* @memberof Timeline
+* @function _performTimeCleanup
+* @returns {string} - A cleaned up string value for duration in milliseconds.
+* @final
+* @static
+* @private
+*/
+Timeline._performTimeCleanup = function(time) {
+	// if the time value is not a string or does not have a second or millisecond value
+	if ((typeof time) !== "string") {
+		window.alert("Please provide a time value in milliseconds or seconds.");
+	}
+	
+	// assume time is in seconds, convert to milliseconds
+	if (time.indexOf("ms") === -1 &amp;&amp; time.indexOf("s") !== -1) {
+		time = (parseFloat(time.replace("s","")) * 1000) + "ms";
+	}
+	
+	// convert any invalid millisecond values to valid ones
+	var ind = time.lastIndexOf("ms") - 1;// get index of last number before "ms"
+	var char = time.charAt(ind);// the actual string character at the previously fetched index
+	
+	if (char !== "0") {
+		time = time.substring(0,ind) + "0ms";// if last number before "ms" is not a zero, make it one
+	}
+	
+	ind = time.lastIndexOf("ms") - 2;// get second to last number before "ms"
+	char = time.charAt(ind);
+	
+	// if second to last digit before "ms" is not a zero or five, round and make it one
+	if (char !== "0" || char !== "5") {
+		var num = parseInt(char) - 5;
+		num = (num &lt; 3 || num > -3) ? 0 : 5;
+		time = time.substring(0,ind) + num + "0ms";
+	}
+	
+	return time;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Function to check the value of the ease type provided for any issues.
+* 
+* @param {!string} ease - Ease value to check.
+* @memberof Timeline
+* @function _performEaseCheck
+* @returns {string} - A verified ease value.
+* @final
+* @static
+* @private
+*/
+Timeline._performEaseCheck = function(ease) {
+	// EASE check
+	if (ease === undefined) {
+		return Ease.EASE;
+	}
+	else if (ease !== Ease.EASE &amp;&amp; ease !== Ease.EASE_IN &amp;&amp; ease !== Ease.EASE_OUT &amp;&amp; ease !== Ease.EASE_IN_OUT &amp;&amp; ease !== Ease.LINEAR) {
+		window.alert("Please provide a valid option for the ease type. This can be Ease.EASE, Ease.EASE_IN, Ease.EASE_OUT, Ease.EASE_IN_OUT, or Ease.LINEAR. The ease parameter can also be left blank and it will default to an easing type of Ease.EASE.");
+	}
+	
+	return ease;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Function to generate the transition object used to control CSS transitions on target HTML elements.
+* 
+* @param {!string} target - The HTML element that should be animated. Pass in the "id" attribute value here.
+* @param {!string} duration - How long, in milliseconds, the transition should play for.
+* @param {!string} property - The name of the CSS style that should be changed.
+* @param {!string} value - The new value of the CSS style.
+* @param {?string=} [ease="ease"] - The type of ease that should be used for this transition.
+* 
+* @memberof Timeline
+* @function _generateTransitions
+* @returns {Object} - A transition object.
+* @final
+* @static
+* @private
+*/
+Timeline._generateTransitions = function(target, duration, property, value, ease) {
+	return {htmlObject:target, dur:duration, es:ease, trans:(property + " " + duration + " " + ease), props:[{prop:property, val:value}]};
+}
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------- Timeline private member methods -------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Callback function for the window "onfocus" event. Tells the Timeline to resume by re-setting the timer that is 
+* "ticking" the Timeline forward.
+* 
+* @param {!Object} e - Event data
+* @memberof Timeline#
+* @function _onWindowFocus
+* @final
+* @instance
+* @private
+*/
+Timeline.prototype._onWindowFocus = function(e) {
+	window.top.removeEventListener("focus", this._onWindowFocus);
+	window.top.addEventListener("blur", this._onWindowBlur);
+	this._timer = setTimeout(this._onTimerTick.bind(this), Timeline._tickRate);
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Callback function for the window "onblur" event. Tells the Timeline to stop by clearing the timer that is 
+* "ticking" the Timeline forward.
+* 
+* @param {!Object} e - Event data
+* @memberof Timeline#
+* @function _onWindowBlur
+* @final
+* @instance
+* @private
+*/
+Timeline.prototype._onWindowBlur = function(e) {
+	window.top.addEventListener("focus", this._onWindowFocus);
+	window.top.removeEventListener("blur", this._onWindowBlur);
+	
+	if (!this._timer) {
+		clearTimeout(this._timer);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Function that gets called every time the setTimeout method ticks. This function sets the transition 
+* styles on each HTML element that should have a property change and then makes the property change so 
+* the transition will play.
+* 
+* @param {!Object} e - Event data for the setTimeout function
+* @memberof Timeline#
+* @function _onTimerTick
+* @final
+* @instance
+* @private
+*/
+Timeline.prototype._onTimerTick = function(e) {
+	var ms = this._counter + "ms";// now
+	var msf = (this._counter + (Timeline._tickRate * 2)) + "ms";// future
+	var i = 0;
+	var element;
+	var transform;
+	var duration = 0;
+	
+	// if there is a keyframe 100ms in the future, setup the tranistion styles for the target
+	if (this._keyframes[msf]) {
+		while (i &lt; this._keyframes[msf].length) {
+			transform = (this._keyframes[msf][i].trans.indexOf("transform") !== -1) ? true : false;
+			element = document.getElementById(this._keyframes[msf][i].htmlObject);
+			element.style["-webkit-transition"] = (transform === true) ? "-webkit-" : "" + this._keyframes[msf][i].trans;
+			element.style["-moz-transition"] = (transform === true) ? "-moz-" : "" + this._keyframes[msf][i].trans;
+			element.style["-o-transition"] = (transform === true) ? "-o-" : "" + this._keyframes[msf][i].trans;
+			element.style.transition = this._keyframes[msf][i].trans;
+			
+			i += 1;
+		}
+	}
+	
+	// if there is a keyframe at this moment, change the style values so that they will transition to the new value
+	i = 0;
+	if (this._keyframes[ms]) {
+		while (i &lt; this._keyframes[ms].length) {
+			var j = 0;
+			element = document.getElementById(this._keyframes[ms][i].htmlObject);
+			while (j &lt; this._keyframes[ms][i].props.length) {
+				if (this._length === 1 &amp;&amp; Number(this._keyframes[ms][i].dur.replace("ms","")) > duration) {
+					duration = Number(this._keyframes[ms][i].dur.replace("ms",""));
+				}
+				element.style[this._keyframes[ms][i].props[j].prop] = this._keyframes[ms][i].props[j].val;
+				
+				j += 1;
+			}
+			
+			i += 1;
+		}
+		
+		this._length -= 1;
+	}
+	
+	this._counter += Timeline._tickRate;// increment counter keeping track of the current playhead position
+	
+	// if length is not zero, there are more keyframes to hit and targets to make changes to
+	if (this._length !== 0) {
+		this._timer = setTimeout(this._onTimerTick.bind(this), Timeline._tickRate);
+	}
+	// else this was the last keyframe and a FINISH event should be dispatched after the final transition is done playing
+	else {
+		setTimeout(this.dispatchEvent.bind(this), duration, TimelineEvent.FINISH);
+	}
+}
+
+
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+// --------------------------------------- Timeline public member methods --------------------------------------- //
+// -------------------------------------------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Adds, or appends to, a keyframe of changes that should be made to an HTML element at a specific point in time
+* 
+* @param {!string} startTime - The time, in milliseconds, when this transition should start playing. For example, 
+* "2000ms" for a starting time of 2 seconds.
+* @see {@link Timeline#addStyleChange}
+* @returns {Timeline} - A reference to this instance of the Timeline object.
+* @memberof Timeline#
+* @function addKeyframe
+* @final
+* @instance
+* 
+* @example
+* var timeline = new Timeline();
+* timeline.addKeyframe("2000ms");
+*/
+Timeline.prototype.addKeyframe = function(startTime) {
+	startTime = Timeline._performTimeCleanup(startTime);
+	
+	this._currentKeyframe = startTime;
+	
+	// if this is the first keyframe at this time in milliseconds, create the dynamic property in the "keyframes" object
+	if (!this._keyframes[this._currentKeyframe]) {
+		this._keyframes[this._currentKeyframe] = [];
+		this._length += 1;
+	}
+	
+	return this;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* The makeStyleChange() method applies a CSS style change to a specific HTML element immediately using a specified 
+* easing type.
+* 
+* @param {!string} target - The HTML element that should be animated. Pass in the "id" attribute value here. For 
+* example, "copy1" if you have the following in the body of the HTML: &amp;lt;div &lt;strong>id="copy1"&lt;/strong>&amp;gt;Hello 
+* World&amp;lt;/div&amp;gt;
+* @param {!string} duration - How long, in milliseconds, the transition should play for. For example, "500ms" for 
+* a duration of half a second.
+* @param {!string} property - The name of the CSS style that should be changed.
+* @param {!string} value - The new value of the CSS style.
+* @param {?string=} [ease="ease"] - The type of ease that should be used for this transition. Supported ease types 
+* include:&lt;ul>&lt;li>ease&lt;/li>&lt;li>ease-in&lt;/li>&lt;li>ease-out&lt;/li>&lt;li>ease-in-out&lt;/li>&lt;li>linear&lt;/li>&lt;/ul>
+* @returns {Timeline} - A reference to this instance of the Timeline object.
+* @memberof Timeline#
+* @function makeStyleChange
+* @final
+* @instance
+* 
+* @example &lt;caption>This example shows how to immediatley make a style change to a target element and it will 
+* transition that value.&lt;/caption>
+* var timeline = new Timeline();
+* timeline.makeStyleChange("cta", "500ms", "opacity", "0", Ease.EASE);
+*/
+Timeline.prototype.makeStyleChange = function(target, duration, property, value, ease) {
+	duration = Timeline._performTimeCleanup(duration);
+	ease = Timeline._performEaseCheck(ease);
+	
+	var transitions = Timeline._generateTransitions(target, duration, property, value, ease);
+	var element = document.getElementById(target);
+	var transform = (transitions.trans.indexOf("transform") !== -1);
+	element.style["-webkit-transition"] = (transform === true) ? "-webkit-" : "" + transitions.trans;
+	element.style["-moz-transition"] = (transform === true) ? "-moz-" : "" + transitions.trans;
+	element.style["-o-transition"] = (transform === true) ? "-o-" : "" + transitions.trans;
+	element.style.transition = transitions.trans;
+	element.style[transitions.props[0].prop] = transitions.props[0].val;
+	
+	return this;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* The addStyleChange() method applies a CSS style change to a specific HTML element at a specific point in time 
+* using a specified easing type.
+* 
+* @param {!string} target - The HTML element that should be animated. Pass in the "id" attribute value here. For 
+* example, "copy1" if you have the following in the body of the HTML: &amp;lt;div &lt;strong>id="copy1"&lt;/strong>&amp;gt;Hello 
+* World&amp;lt;/div&amp;gt;
+* @param {!string} duration - How long, in milliseconds, the transition should play for. For example, "500ms" for 
+* a duration of half a second.
+* @param {!string} property - The name of the CSS style that should be changed.
+* @param {!string} value - The new value of the CSS style.
+* @param {?string=} [ease="ease"] - The type of ease that should be used for this transition. Supported ease types 
+* include:&lt;ul>&lt;li>ease&lt;/li>&lt;li>ease-in&lt;/li>&lt;li>ease-out&lt;/li>&lt;li>ease-in-out&lt;/li>&lt;li>linear&lt;/li>&lt;/ul>
+* @returns {Timeline} - A reference to this instance of the Timeline object.
+* @memberof Timeline#
+* @function addStyleChange
+* @final
+* @instance
+* 
+* @example
+* var timeline = new Timeline();
+* timeline.addKeyframe("1000ms");
+* timeline.addStyleChange("cta", "500ms", "opacity", "0", Ease.EASE);
+*/
+Timeline.prototype.addStyleChange = function(target, duration, property, value, ease) {
+	// if the current keyframe time is 0ms or 50ms, go ahead and apply the styles to the target
+	if (this._currentKeyframe === "0ms" || this._currentKeyframe === "50ms") {
+		return this.makeStyleChange(target, duration, property, value, ease);
+	}
+	
+	duration = Timeline._performTimeCleanup(duration);
+	ease = Timeline._performEaseCheck(ease);
+	
+	var transitions = Timeline._generateTransitions(target, duration, property, value, ease);
+	var added = false;
+	
+	// loop through all current transitions assigned on this keyframe and if this target already has set to 
+	// receive a style change, append to the set of style changes
+	var i = 0;
+	while (i &lt; this._keyframes[this._currentKeyframe].length) {
+		if (this._keyframes[this._currentKeyframe][i].htmlObject === transitions.htmlObject) {
+			this._keyframes[this._currentKeyframe][i].props = this._keyframes[this._currentKeyframe][i].props.concat(transitions.props);
+			this._keyframes[this._currentKeyframe][i].trans += ", " + transitions.trans;
+			added = true;
+			break;
+		}
+		
+		i += 1;
+	}
+	
+	// first instance of this target object receiving style changes
+	if (added === false) {
+		this._keyframes[this._currentKeyframe].push(transitions);
+	}
+	
+	return this;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Call this method after setting all the keyframes for the HTML5 banner. This method should be called at the end 
+* of an onload function.
+* 
+* @returns {Timeline} - A reference to this instance of the Timeline object.
+* @memberof Timeline#
+* @see {@link Timeline#pause}
+* @function play
+* @final
+* @instance
+* 
+* @example &lt;caption>This example assumes that a Timeline object has been created, keyframes have been added, and 
+* style changes have been made.&lt;/caption>
+* timeline.play();
+*/
+Timeline.prototype.play = function() {
+	if (this._timerRunning === false) {
+		this.dispatchEvent((this._counter === 0) ? TimelineEvent.START : TimelineEvent.RESUME);
+		this._timer = setTimeout(this._onTimerTick.bind(this), Timeline._tickRate);
+		this._timerRunning = true;
+	}
+	
+	return this;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Pause the Timeline so that no further CSS transitions will occur. Any transition that was currently animating 
+* will continue to play until the transition has finished. This only prevents future transitions from occuring.
+* 
+* @returns {Timeline} - A reference to this instance of the Timeline object.
+* @memberof Timeline#
+* @see {@link Timeline#play}
+* @function pause
+* @final
+* @instance
+* 
+* @example &lt;caption>This example assumes that a Timeline object has been created, keyframes have been added, and 
+* style changes have been made.&lt;/caption>
+* timeline.pause();
+*/
+Timeline.prototype.pause = function() {
+	if (this._timerRunning === true) {
+		this.dispatchEvent(TimelineEvent.PAUSE);
+		
+		clearTimeout(this._timer);
+		this._timerRunning = false;
+	}
+	
+	return this;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Attaches an event handler to the Timeline object.
+* 
+* @param {!string} event - A String that specifies the name of the event.
+* @param {!object} callback - Specifies the function to run when the event occurs.
+* 
+* @memberof Timeline#
+* @function addEventListener
+* @final
+* @instance
+* 
+* @example &lt;caption>This example shows adding an event listener for the Timeline set of transitions finishing and 
+* runs a function when that event occurs. In the callback function for the FINISH event, a removeEventListener() 
+* method call is executed removing the FINISH event listener as it is no longer needed. Actual keyframes and style 
+* changes will need to be added for this example to be useful.&lt;/caption>
+* function onTimelineFinish() {
+* 	timeline.removeEventListener(TimeLineEvent.FINISH, onTimelineFinish);
+* 	// do something after timeline set of transitions is over
+* }
+* 
+* var timeline = new Timeline();
+* timeline.addEventListener(TimeLineEvent.FINISH, onTimelineFinish);
+*/
+Timeline.prototype.addEventListener = function(event, callback) {
+	this._events[event] = this._events[event] || [];
+	
+	if (this._events[event]) {
+		this._events[event].push(callback);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Removes an event handler from the Timeline object.
+* 
+* @param {!string} event - A String that specifies the name of the event to remove.
+* @param {!object} callback - Specifies the function to remove.
+* 
+* @memberof Timeline#
+* @function removeEventListener
+* @final
+* @instance
+* 
+* @example &lt;caption>This example shows adding an event listener for the Timeline set of transitions finishing and 
+* runs a function when that event occurs. In the callback function for the FINISH event, a removeEventListener() 
+* method call is executed removing the FINISH event listener as it is no longer needed. Actual keyframes and style 
+* changes will need to be added for this example to be useful.&lt;/caption>
+* function onTimelineFinish() {
+* 	timeline.removeEventListener(TimeLineEvent.FINISH, onTimelineFinish);
+* 	// do something after timeline set of transitions is over
+* }
+* 
+* var timeline = new Timeline();
+* timeline.addEventListener(TimeLineEvent.FINISH, onTimelineFinish);
+*/
+Timeline.prototype.removeEventListener = function(event, callback) {
+	if (this._events[event]) {
+		var listeners = this._events[event];
+		var i = listeners.length;
+		while (i--) {
+			if (listeners[i] === callback) {
+				listeners.splice(i, 1);
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Dispatches an event from the Timeline object.
+* 
+* @param {!string} event - A String that specifies the name of the event to dispatch.
+* 
+* @memberof Timeline#
+* @function dispatchEvent
+* @final
+* @instance
+* @private
+*/
+Timeline.prototype.dispatchEvent = function(event) {
+	if (this._events[event]) {
+		var listeners = this._events[event];
+		var len = listeners.length;
+		while (len--) {
+			listeners[len](this);
+		}		
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Add an event listener to the main webpage window to know when the window/tab becomes unfocused. This will 
+* automatically pause/resume the animation if the window/tab is not in focus. Call this method inside an onload 
+* function or at the bottom of the JavaScript code in an HTML5 banner.&lt;br />
+* &lt;br />
+* &lt;b>NOTE:&lt;/b> This feature is NOT supported in Safari.&lt;br />
+* &lt;br />
+* &lt;b>NOTE:&lt;/b> Because of how CSS transitions work, it is not practical to be able to truly pause any transition 
+* that is currently playing and then resume it from it's last position. So the pause/resume functionality will 
+* prevent any future transitions from playing when the window/tab does not have focus, and then resume the HTML5 
+* banner when the window/tab regains focus.
+* 
+* @memberof Timeline#
+* @function addFocusListener
+* @see {@link Timeline#removeFocusListener}
+* @final
+* @instance
+* 
+* @example 
+* var timeline = new Timeline();
+* timeline.addFocusListener();
+*/
+Timeline.prototype.addFocusListener = function() {
+	window.top.addEventListener("blur", this._onWindowBlur);
+}
+
+// -------------------------------------------------------------------------------------------------------------- //
+/**
+* Remove the blur event listener from the main webpage window. The animation will continue to play in the background 
+* if the browser allows it to.&lt;br />
+* &lt;br />
+* &lt;b>NOTE:&lt;/b> This feature is NOT supported in Safari.
+* 
+* @memberof Timeline#
+* @function removeFocusListener
+* @see {@link Timeline#addFocusListener}
+* @final
+* @instance
+* 
+* @example
+* var timeline = new Timeline();
+* timeline.removeFocusListener();
+*/
+Timeline.prototype.removeFocusListener = function() {
+	window.top.removeEventListener("blur", this._onWindowBlur);
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Timeline.html">Timeline</a></li></ul><h3>Namespaces</h3><ul><li><a href="BannerTransition.html">BannerTransition</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Sep 23 2018 11:34:18 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

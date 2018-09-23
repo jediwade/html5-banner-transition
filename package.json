@@ -1,0 +1,24 @@
+{
+	"name":"html5-banner-transition",
+	"title":"HTML5 JavaScript Banner Transition Library",
+	"description":"This JavaScript banner animation library intended for use with creating web-based animated banners using HTML5's CSS transition capabilties.",
+	"version":"1.0.0",
+	"author":{
+		"name": "Wade Walker",
+		"email": "wadedwalker@gmail.com",
+		"url": "https://wadedwalker.com/"
+	},
+	"keywords": [
+		"JavaScript",
+		"banners"
+	],
+	"license":"MIT",
+	"homepage": "https://github.com/jediwade/html5-banner-transition",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jediwade/html5-banner-transition.git"
+	},
+	"bugs": {
+		"url": "https://github.com/jediwade/html5-banner-transition/issues"
+	}
+}
